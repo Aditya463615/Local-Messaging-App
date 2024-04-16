@@ -118,4 +118,4 @@ def send_message(data):
         emit('message_from_user', {'message':message, 'sender':sender_sid, 'sender_name':users[sender_sid]['user_name']}, room=recipients)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='192.168.31.151', port=80)
+    socketio.run(app, debug=True, host='0.0.0.0', port=8080)
