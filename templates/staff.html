@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Page</title>
+    <script src="{{ url_for('static', filename='socket.io.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        var socket = io.connect(`http://${document.domain}`);
+
+        // 1. Connect event
+        socket.on('connect', function () {
+            console.log('Connected to server');
+        });
+
+        // 2. Verify user event
+        socket.on('verify_user', function (data) {
+            console.log('User verified:', data);
+        });
+
+        // 4. message_individual event
+        socket.on('message_from_user', function (data) {
+            console.log('Received individual message:', data);
+            alert(data.message);
+            impliment_received_message(data);
+        });
+
+        // send message  
+        function send_message(message, recipients) {
+            socket.emit('send_message', { message: message, recipients: recipients });
+        }
+    </script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Hii {{ username }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+    <div class="content">
+        <aside class="bd-sidebar">
+            <div class="tab_group">
+                <span class="tab_group_name">Network</span>
+                <ul>
+                    <li class="active_tab" tab-system>Dashboard</li>
+                    <li for="network" tab-system>Users</li>
+                    <li for="chat" tab-system>Chat</li>
+                </ul>
+            </div>
+            <div class="tab_group">
+                <span class="tab_group_name">Security</span>
+                <ul>
+                    <li for="live-camera" tab-system>Live Camera</li>
+                </ul>
+            </div>
+            <div class="tab_group">
+                <span class="tab_group_name">A/c Database</span>
+                <ul>
+                    <li tab-system>PNB Accounts</li>
+                    <li tab-system>CBI Accounts</li>
+                    <li tab-system>BUPGB Accounts</li>
+                    <li tab-system>HDFC Accounts</li>
+                </ul>
+            </div>
+        </aside>
+        <main id="dashboard" tab-container>
+            No dahsboard data here 
+        </main>
+        <main id="chat" class="home" tab-container>
+            <div class="mt-1">
+                <div class="message-ui">
+                    <div class="recipients">
+                        <span class="tab_group_name">Groups</span>
+                        <ul>
+                            <li onclick="contact(this)" group-recipients="true" recipients="admin" class="active_tab">
+                                Admin Group</li>
+                            <li onclick="contact(this)" contact group-recipients="true" recipients="staff">Staff Group
+                            </li>
+                            <li onclick="contact(this)" contact group-recipients="true" recipients="client">Client Group
+                            </li>
+                        </ul>
+                        <span class="tab_group_name">Users</span>
+                        <ul id="individuals">
+                            <!--individual contact will be added here dynamically-->
+                        </ul>
+                    </div>
+                    <div class="message-container">
+                        <div class="recipients-details" sid="admin">
+                            Admin Group
+                        </div>
+                        <div class="message-box" receiver_address="admin">
+                            <div class="message-bubble">
+                                <div class="message-in message">
+                                    <div class="sender-details">
+                                        User A
+                                    </div>
+                                    <div class="text">
+                                        Hello Admin, You got a new message
+                                    </div>
+                                    <div class="message-info">
+                                        <span class="time">09:45 am</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-box">
+                            <input type="text" name="message-input" id="message-input" placeholder="Message">
+                            <button id="send_message" class="send-message-button">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <main id="network" tab-container>
+            <div id="users_table" class="card mt-2">
+                <div class="card-header">Connected users</div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Session ID</th>
+                            <th>IP Address</th>
+                            <th>User</th>
+                            <th>Connected at</th>
+                            <th>Verification</th>
+                            <th>User type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!--Content here will be added dynamically-->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        <main id="live-camera" tab-container>
+            No cam data here
+        </main>
+    </div>
+    <script>
+        // Function to emit verify_user event
+        function verifyUser(userType) {
+            socket.emit('verify_user', { user_type: `${window.location.href.split('/')[window.location.href.split('/').length - 2]}`, user_name: `${window.location.href.split('/')[window.location.href.split('/').length - 1]}` });
+        }
+
+        window.addEventListener('load', function () {
+            verifyUser();
+        });
+
+        socket.on('update_web_app', function (data) {
+            console.log('Received message:', data); // log the message received 
+            var table = document.querySelector('#users_table tbody');
+            let table_html = '';
+            var recipients = document.querySelector('.message-ui .recipients ul#individuals');
+            let recipientsHtml = '';
+            for (let i in data.users) {
+                var user_sid = i;
+                var user_ip = data.users[i].IP;
+                var user = data.users[i].user_name;
+                var user_connection_time = data.users[i].Connected_at;
+                var user_verification_status = data.users[i].Varification;
+                var user_type = data.users[i].user_type;
+                table_html += `<tr><td>${user_sid}</td><td>${user_ip}</td><td>${user}</td><td>${user_connection_time}</td><td>${user_verification_status}</td><td>${user_type}</td></tr>`
+                recipientsHtml += `<li  onclick="contact(this)" group-recipients="false" recipients="${user_sid}">${user}</li>`;
+            }
+            table.innerHTML = table_html;
+            recipients.innerHTML = recipientsHtml;
+        });
+    </script>
+    <script src="{{ url_for('static', filename='script.js')}}"></script>
+</body>
+
+</html>
