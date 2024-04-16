@@ -180,3 +180,6 @@ socket.on('update_web_app', function (data) {
 - executing the main `app.py` file directly don't need any modification in the webpages.
 - For your own use you can modify the file as per your need.
 - For users their app will be serving at the url like `localhost:8080/user_type/user_name` where usertype may be `admin`, `staff` or `client`.
+## Screenshots
+- ![Example Image](https://i.ibb.co/CQ6YVLs/Screenshot-2024-04-16-181417.png)
+- ![Example Image](https://i.ibb.co/p27qWqH/Screenshot-2024-04-16-181457.png)
