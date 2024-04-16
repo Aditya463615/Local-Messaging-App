@@ -174,6 +174,7 @@ socket.on('update_web_app', function (data) {
     console.log('Received message:', data); // log the message received
 });
 ```
+- remember to replace and handle the valiables `user_type`, `user_name` and `server_url`.
 
 ## Important
 - executing the main `app.py` file directly don't need any modification in the webpages.
